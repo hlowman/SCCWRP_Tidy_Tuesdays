@@ -1,0 +1,70 @@
+---
+title: "Week 1"
+author: "hlowman"
+date: "8/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Week 1 Cheat Sheet
+
+This is an R Markdown document that will walk through the code run during SCCWRP's Week 1 Tidy Tuesday meeting. Additional documentation and resources available at our GitHub repository at <https://github.com/hlowman/SCCWRP_Tidy_Tuesdays>.
+
+### Part 1 : Basics
+
+The first part of RStudio that we will be working in is called the **Console**. This is the part of the application that tells you what R is running.
+
+Type the following into the console:
+
+`4`
+
+`cat <- 4`
+
+`mouse <- 8`
+
+`cat + mouse`
+
+`chaos <- cat + mouse`
+
+`cchaos` Warning: This will give you an error!
+
+`chaos`
+
+You'll notice as we add these variables that they appear in the **Environment** tab, in the second section of RStudio that you'll become familiar with. Whenever you want/need to clear out your existing variables, simply click on the broom button to erase all stored variables.
+
+In this same section is the **History** tab, which will record all the code you've run. For the most part, you can ignore this tab. The **Connections** tab will show all of your connections to other databases, and the **Git** tab will allow you to version control you scripts. But we'll get to that later...
+
+Immediately below is the third section of RStudio, where all of your **Packages** are stored.
+
+Load a new package, called "vegan" by typing the following into your console:
+
+`install.packages("vegan")`
+
+You should see it pop up in the packages tab. To connect the package from your console, type the following:
+
+`library(vegan)`
+
+Now your package is loaded, and ready to use. The remaining tabs in this section allow you to see the **Files** that are associated with your code, the **Plots** you've created, **Help** documents when you get stuck, and view additional HTML content you might create with the **Viewer** tab. Don't worry, we'll go over each of these more in detail soon.
+
+In Part 1, we have:
+
+- Opened RStudio.
+- Typed in the **console** and figured out what it does.
+- Learned the other parts and tabs of RStudio.
+
+You're ready to get started on your first R project!!
+
+### Part 2: R Scripts
+
+Create a new project.
+
+Work in the R Script below.
+
+```{r R Script}
+plot(pressure)
+```
+
+End of R Markdown document.
