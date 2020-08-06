@@ -1,6 +1,6 @@
 ---
 title: "Week 1"
-author: "hlowman"
+author: "Heili Lowman"
 date: "8/4/2020"
 output: html_document
 ---
@@ -12,6 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Week 1 Cheat Sheet
 
 This is an R Markdown document that will walk through the code run during SCCWRP's Week 1 Tidy Tuesday meeting. Additional documentation and resources available at our GitHub repository at <https://github.com/hlowman/SCCWRP_Tidy_Tuesdays>.
+
+By the end of today, you should be able to:
+
+- recognize the RStudio interface and what each part of the window displays.
+- start a new R project and save files to it.
+- write a basic R script and create a plot using ggplot.
+
+There will be an additional exercise at the end for you to practice what you've learned. Feel free to stick around and work on it with us, or work through it on your own before our next meeting.
 
 ### Part 1 : Basics
 
@@ -43,7 +51,7 @@ Load a new package, called "vegan" by typing the following into your console:
 
 `install.packages("vegan")`
 
-You should see it pop up in the packages tab. To connect the package from your console, type the following:
+You should see it pop up in the packages tab. To connect the package, type the following into your console:
 
 `library(vegan)`
 
@@ -57,14 +65,170 @@ In Part 1, we have:
 
 You're ready to get started on your first R project!!
 
-### Part 2: R Scripts
+### Part 2: R file structure
 
-Create a new project.
+**PSA:** Starting off organized and staying organized in R will make FUTURE YOU so much happier! So, throughout these meetings, we're going to encourage that you take a moment to organize your files and keep things tidy.
 
-Work in the R Script below.
+(1) Pick a location on your machine where you are going to store all of your scripts. I typically organize things by research project, but you should do what works for you. You should pick something logical and easy to find.
+
+(2) Create a folder at that location titled "R_Scripts". *NOTE:* NEVER USE SPACES WHEN CREATING FILES TO BE USED WITH R!!!
+
+(3) Create another folder at that location titled "Beginning_R_Tutorial". This is where you will store all of your files - datasets, images, etc.
+
+(4) Now, back in R, create a new project. Give it a useful name ("Intro_to_R") and set the working directory to the Beginning_R_Tutorials file. Open in a new window and you're ready to begin work!
+
+In Part 2, we have:
+
+- Learned the importance of staying organized.
+- Created a new **R project** and saved it to a memorable location on our computers.
+- Begun work on our first project.
+
+You're ready to get started on your first R script!!
+
+### Part 3: R scripts
+
+Open a new R script (File > New File > R Script) and type the below code into the newly createdscript window instead of the console. 
+
+This workflow will allow you to save and edit your work. If we worked constantly in the **console**, it would be like sending a million texts, but working in a **script** is more like working in Word - you can save, edit, and track your changes.
+
+**Code for R Script below.**
 
 ```{r R Script}
-plot(pressure)
+# Tidy Tuesday Week 1
+# Everything that is preceded by a hashtag/pound sign is considered a comment and will not be run by the computer.
+# Heili Lowman
+# August 11, 2020
+
+#### Intro ####
+
+# In the code below, you'll also notice that my comments may far outnumber the actual lines of code. That's ok. You want to comment, or annotate, your lines of code a LOT so that FUTURE YOU knows what the heck you did.
+
+# Your style of annotation depends on what you prefer, but I most often add in a line of comments that precedes my code. So like this:
+
+# Create a new variable.
+leaf <- 3 + 8
+
+# In a script, instead of pressing "Enter" you should also get in the habit of using one of the shortcuts below to run your lines of code:
+
+# To run the current line:
+# Mac: Command + Enter
+# PC: Control + Enter
+
+# To run all code of a script:
+# Mac: Command + Shift + Enter
+# PC: Control + Shift + Enter
+
+# Let's try with the following variables.
+
+tree <- 10 + 15
+
+forest <- leaf * tree
+
+# Notice as you run these, they appear in your environment. You can also go back and edit them, re-run them, and they'll change in the environment.
+
+# Now that we've added some content, let's SAVE before we go any further.
+
+#### Datasets ####
+
+# R has a lot of cool data pre-loaded that you can play around with, so we're going to use that to first take a look at how datasets work in R.
+
+# The pre-loaded dataset we'll be working with today is called iris, and we can take a look at it by typing and running the following:
+
+View(iris)
+
+# You should see 5 columns with information about samples' sepal and petal length and width from multiple different species.
+
+# Now, let's learn some basic tools we can use to take a look at our datasets.
+
+# This will allow you to take a look at the top part of the dataset (if we had not yet opened the viewer tab).
+head(iris)
+
+# This will allow you to take a look at the bottom part of the dataset.
+tail(iris)
+
+# Also, you can call certain parts of the dataset using the dollar sign ($).
+# So, if you wanted to calculate the mean sepal length of all samples and assign it to a variable:
+
+mean_sl <- mean(iris$Sepal.Length)
+
+# Or you could calculate the maximum petal width:
+
+max_pw <- max(iris$Petal.Width)
+
+# The last useful dataset function we'll take a look at is str():
+str(iris)
+
+# This tells us the types of data within your dataset.
+# num is numerical. Examples of this include 1, 2.83, 9374547389, etc.
+# Factor is categorical. Examples of this include species, colors, etc.
+
+# We will also learn about some other forms of data as we go, but just know for now that data within a dataset comes in multiple forms, so it's important to check to see what type of data they are.
+
+#### Plotting ####
+
+# The final thing we'll do today is upload a dataset from our computers and create a fun plot with it.
+
+# In order to load this data, we'll first need to load the package that allows us to do so.
+
+# The library() function tells R to take the tidyverse package off the shelf and start using it so we can use the functions inside of it.
+library(tidyverse)
+
+# Now, we'll upload a dataset containing information about the data science survey results and assign it a useful name.
+
+survey <- read_csv("survey_data.csv")
+
+# And let's take a look at it.
+
+View(survey)
+
+# Before we plot anything, let's be certain we know what structure our data is in.
+
+str(survey)
+
+# So, it's recognizing Tools as a vector of characters (a.k.a. a string of letters) and the remaining columns as numerical.
+
+# Let's go ahead and build a bar plot of this data.
+
+survey_graph <- ggplot(survey, aes(x = Tools, y = Know)) +
+  geom_point() +
+  ggtitle("Data Science Survey Results") +
+  xlab("Data Tools") +
+  ylab("Number of Respondents")
+
+survey_graph
+
+# Let's make some edits to:
+# (1) add a different point color and size
+# (2) fix the y axis to start from zero
+# (3) make the grey background white.
+
+survey_graph2 <- ggplot(survey, aes(x = Tools, y = Know)) +
+  geom_point(color = "coral1", size = 5) + # Edits point color and size.
+  ggtitle("Data Science Survey Results") +
+  xlab("Data Tools") +
+  ylim(0, 25) + # Start y axis at zero.
+  ylab("Number of Respondents") +
+  theme_bw() # Remove grey background.
+
+survey_graph2  
+
+# Congratulations! You just made and edited a figure in R!
+
+# Along the way, you might have noticed that we've been adding extra pound symbols to our section headers. If you click what looks like a table of contents icon to the upper right of your script window, you'll see your existing table of contents pop up! These extra pound symbols help keep your scripts doubly organized :)
+
 ```
+
+In Part 3, we have:
+
+- Created our first R script.
+- Learned how to look at **data** in R.
+- Uploaded a dataset and created our first figure in R.
+
+If you want more practice with ggplot, make the following edits to a new figure:
+
+(1) Start a new figure.
+(2) Plot the tools used along the y-axis versus the tools themselves along the x-axis.
+(3) Make sure the y-axis is edited to fit this new data.
+(4) Change the size and color of the points.
 
 End of R Markdown document.
