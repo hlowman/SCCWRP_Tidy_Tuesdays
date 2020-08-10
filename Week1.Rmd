@@ -126,11 +126,17 @@ forest <- leaf * tree
 
 # Notice as you run these, they appear in your environment. You can also go back and edit them, re-run them, and they'll change in the environment.
 
+# Now, take a moment to create your own variables and get comfortable with the process.
+
+# ... PAUSE ...
+
 # Now that we've added some content, let's SAVE before we go any further.
 
 #### Datasets ####
 
 # R has a lot of cool data pre-loaded that you can play around with, so we're going to use that to first take a look at how datasets work in R.
+
+#data()
 
 # The pre-loaded dataset we'll be working with today is called iris, and we can take a look at it by typing and running the following:
 
@@ -147,6 +153,11 @@ head(iris)
 tail(iris)
 
 # Also, you can call certain parts of the dataset using the dollar sign ($).
+
+iris$Sepal.Length
+
+# And you can use these columns as you would the variables we played around with earlier.
+
 # So, if you wanted to calculate the mean sepal length of all samples and assign it to a variable:
 
 mean_sl <- mean(iris$Sepal.Length)
@@ -154,6 +165,12 @@ mean_sl <- mean(iris$Sepal.Length)
 # Or you could calculate the maximum petal width:
 
 max_pw <- max(iris$Petal.Width)
+
+# Or you could calculate the minimum number of species:
+
+#min_sp <- min(iris$Species)
+
+# Whoops! No you can't! Which brings us to...
 
 # The last useful dataset function we'll take a look at is str():
 str(iris)
@@ -164,6 +181,14 @@ str(iris)
 
 # We will also learn about some other forms of data as we go, but just know for now that data within a dataset comes in multiple forms, so it's important to check to see what type of data they are.
 
+# Now, take a moment to pick out another dataset from data().
+# Use the str() function to look at the structure of the data.
+# And calculate the minimum value of a numeric column.
+
+# ... PAUSE ...
+
+# Remember to save please!
+
 #### Plotting ####
 
 # The final thing we'll do today is upload a dataset from our computers and create a fun plot with it.
@@ -171,6 +196,11 @@ str(iris)
 # In order to load this data, we'll first need to load the package that allows us to do so.
 
 # The library() function tells R to take the tidyverse package off the shelf and start using it so we can use the functions inside of it.
+
+# If you didn't install it last week:
+
+# install.packages("tidyverse")
+
 library(tidyverse)
 
 # Now, we'll upload a dataset containing information about the data science survey results and assign it a useful name.
@@ -187,11 +217,11 @@ str(survey)
 
 # So, it's recognizing Tools as a vector of characters (a.k.a. a string of letters) and the remaining columns as numerical.
 
-# Let's go ahead and build a bar plot of this data.
+# Let's go ahead and build a scatterplot of this data.
 
 survey_graph <- ggplot(survey, aes(x = Tools, y = Know)) +
   geom_point() +
-  ggtitle("Data Science Survey Results") +
+  ggtitle("Familiar Data Science Tools") +
   xlab("Data Tools") +
   ylab("Number of Respondents")
 
@@ -204,7 +234,7 @@ survey_graph
 
 survey_graph2 <- ggplot(survey, aes(x = Tools, y = Know)) +
   geom_point(color = "coral1", size = 5) + # Edits point color and size.
-  ggtitle("Data Science Survey Results") +
+  ggtitle("Familiar Data Science Tools") +
   xlab("Data Tools") +
   ylim(0, 25) + # Start y axis at zero.
   ylab("Number of Respondents") +
