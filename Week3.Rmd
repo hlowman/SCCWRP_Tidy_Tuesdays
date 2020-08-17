@@ -50,7 +50,7 @@ As you may have guessed, there are also endless formatting options for text.
 Two asterisks around text makes it **BOLD**.
 A single asterisk around text makes it *ITALICIZED*.
 
-*You can created a list using different bulleting options.
+* You can created a list using different bulleting options.
 * Dashes or asterisks start the list.
   + And they can be continued using tabs on the next line.
   
@@ -81,19 +81,27 @@ library(tidyverse)
 
 ```{r data, include = FALSE}
 
-chemistry <- c(1,2,3,4,5)
+chemistry <- read_csv("tbl_chemresults.csv") # Importing data courtesy of Bowen.
 
 ```
 
 
 ### Exploration
 
-Before performing any analyses, it's always a good idea to take a look at your actual dataset. We **do** want to print the results of this code so that our collaborators can also see. However, if you're worried the code might throw them off, let's mask that.
+Before performing any analyses, it's always a good idea to take a look at your actual dataset. If you're worried the code might throw off your collaborators, let's mask that.
 
-```{r exploration, echo = FALSE}
+```{r exploration, include = FALSE}
 
 # Examine the structure of the data.
 str(chemistry)
+
+# Each figure below will look at a different analyte, so let's make a new column that allows us to filter by analyte as a factor.
+
+chemistry <- chemistry %>%
+  mutate(analytename_f = as_factor(analytename))
+
+# Now, let's take a look at how many different analytes there are. WOW 158!
+levels(chemistry$analytename_f)
 
 ```
 
@@ -102,34 +110,117 @@ str(chemistry)
 
 For all of the figures below, we will also mask the code, but add in a figure caption for each.
 
-```{r histogram, echo = FALSE, fig.cap = "Figure 1. Histogram"}
+```{r histogram, echo = FALSE, fig.cap = "Figure 1. Mercury Histogram"}
 
-hist(mtcars$mpg)
-# Insert basic exploratory histogram here.
+# Histograms are excellent figures for initial data exploration analyses.
+
+# First, we're only interested in the mercury data from samples, so let's filter for it.
+
+Hg_data <- chemistry %>%
+  filter(analytename == "Mercury" & sampletype == "Result" & qualifier == "none")
+
+fig1 <- ggplot(data = Hg_data, aes(x = result)) +
+  geom_histogram(binwidth = 0.01) + #
+  ggtitle("Mercury Data Exploration") + ##
+  ylab("Count") + ##
+  xlab("Result (ug/g dry weight)") ##
+
+fig1
+
+# Edit bin width to be more appropriate.
+## If we like this better, be sure to add a good title and axes labels.
+
+```
+
+
+```{r facet, echo = FALSE, fig.cap = "Figure 2. Nickel Facetted Barplot"}
+
+# You can create multiple different figures at once using the facet feature.
+
+# Let's take a look at the nickel data from the samples, so again, let's create a new dataset.
+
+Ni_data <- chemistry %>%
+  filter(analytename == "Nickel" & sampletype == "Result" & qualifier == "none")
+
+fig2 <- ggplot(data = Ni_data, aes(x = stationid, y = result)) +
+  geom_bar(stat="identity") + # just a weird thing you need in there if the data is values instead of counts
+  facet_wrap(~lab, scales = "free_x") + #     ##
+  ggtitle("Nickel Data by Lab") + ###
+  ylab("Result (ug/g dry weight)") + ###
+  xlab("Station ID") ###
+
+fig2
+
+# Go back and add "facet_wrap(~lab)".
+## Then go back and add "scales = "free_x".
+### Title and axis labels last.
 
 ```
 
-```{r scatterplot, echo = FALSE, fig.cap = "Figure 2. Scatterplot by analyte"}
 
-# Insert geom_point plot colored by a factor here.
+```{r scatterplot, echo = FALSE, fig.cap = "Figure 3. Total Organic Carbon Timeseries"}
+
+# Dates can be particularly nasty to deal with, so let's practice with them using the lubridate package.
+
+# install.packages("lubridate")
+
+library(lubridate)
+
+TOC_data <- chemistry %>%
+  filter(analytename == "TOC" & sampletype == "Result" & qualifier == "none") %>%
+  mutate(date_format = mdy_hm(sampledate))
+
+fig3 <- ggplot(data = TOC_data, aes(x = date_format, y = result)) +
+  geom_point(aes(color = lab)) +
+  scale_x_datetime(date_breaks = "months" , date_labels = "%b-%Y") + #
+  theme(legend.position="bottom") + ##
+  ggtitle("Total Organic Carbon Data through Time") + ###
+  ylab("Result (ug/g dry weight)") + ###
+  xlab("Date") ###
+
+fig3
+
+# Go back and add x axis date formatting.
+## Put legend along the bottom.
+### Title and axis labels last.
 
 ```
 
-```{r facet, echo = FALSE, fig.cap = "Figure 3. Barplot by site"}
 
-# Insert facetted geom_bar by site.
+```{r palette, echo = FALSE, fig.cap = "Figure 4. Metals Boxplots using RColorBrewer"}
+
+# Another good data exploration tool is the boxplot.
+# We'll be using a special color package for this one.
+
+# install.packages("RColorBrewer")
+
+library(RColorBrewer)
+
+Metals_data <- chemistry %>%
+  filter(analytename == "Aluminum" | analytename == "Iron" | analytename == "Copper" | analytename == "Lead") %>%
+  filter(sampletype == "Result" & qualifier == "none")
+
+fig4 <- ggplot(data = Metals_data, aes(x = analytename, y = result)) +
+  geom_boxplot(aes(color = analytename)) +
+  scale_colour_brewer("Analyte Name", palette="Set2") + #
+  theme_bw() + ##
+  ggtitle("Selected Metals Data") + ###
+  ylab("Result (ug/g dry weight)") + ###
+  xlab("Analyte Name") ###
+
+fig4
+
+# Add color palette.
+## Remove grey background.
+### Title and axis labels last.
 
 ```
 
-```{r palette, echo = FALSE, fig.cap = "Figure 4. Boxplot with color palette"}
-
-# Insert geom_boxplot using RColorBrewer color palette.
-
-```
 
 ```{r geometries, echo = FALSE, fig.cap = "Figure 5. Scatterplot + Other Geometry"}
 
 # Insert another geom_point with an added geometry of some kind (geom_line, geom_smooth, etc.).
+#ggsave
 
 ```
 
