@@ -35,7 +35,7 @@ hummingbird <- 143
 **NOTE TO SELF - Instruct them to delete the remainder of the document at this point and run it.**
 
 Now, take a moment to type `include=FALSE` in the brackets next to your code chunk title. Re-knit your file and what happens?
-Let's set this back to TRUE now, so it appears during out next knit.
+Let's set this back to TRUE now, so it appears during our next knit.
 
 You can use the following commands to achieve different results:
 
@@ -63,7 +63,11 @@ And, of course, we can delimit parts of our code to create a table of contents.
 
 ### Level 2
 
+The addition of pound symbols creates lower-level headers.
+
 #### Level 3
+
+Anything below four # may sometimes give you errors.
 
 ## Standard Workflow
 
@@ -73,13 +77,14 @@ Today, we're going to use RMarkdown to generate some figures in a manner that wi
 
 First, we'll need to load in our necessary packages and our dataset. The following code chunks will be masked from appearing in the final document. 
 
-```{r packages, include = FALSE}
+```{r packages, include = TRUE}
 
 library(tidyverse)
 
 ```
 
-```{r data, include = FALSE}
+
+```{r data, include = TRUE}
 
 chemistry <- read_csv("tbl_chemresults.csv") # Importing data courtesy of Bowen.
 
@@ -90,75 +95,76 @@ chemistry <- read_csv("tbl_chemresults.csv") # Importing data courtesy of Bowen.
 
 Before performing any analyses, it's always a good idea to take a look at your actual dataset. If you're worried the code might throw off your collaborators, let's mask that.
 
-```{r exploration, include = FALSE}
+```{r exploration, include = TRUE}
 
 # Examine the structure of the data.
 str(chemistry)
 
-# Each figure below will look at a different analyte, so let's make a new column that allows us to filter by analyte as a factor.
-
-chemistry <- chemistry %>%
-  mutate(analytename_f = as_factor(analytename))
-
-# Now, let's take a look at how many different analytes there are. WOW 158!
-levels(chemistry$analytename_f)
+# Now, let's get a glimpse of the dataset.
+glimpse(chemistry)
 
 ```
 
 
 ### Figures
 
-For all of the figures below, we will also mask the code, but add in a figure caption for each.
+For all of the figures below, we will also mask the code using `echo = FALSE` and any messages that appear using `message = FALSE`, but add in a figure caption for each.
 
-```{r histogram, echo = FALSE, fig.cap = "Figure 1. Mercury Histogram"}
-
-# Histograms are excellent figures for initial data exploration analyses.
-
-# First, we're only interested in the mercury data from samples, so let's filter for it.
-
-Hg_data <- chemistry %>%
-  filter(analytename == "Mercury" & sampletype == "Result" & qualifier == "none")
-
-fig1 <- ggplot(data = Hg_data, aes(x = result)) +
-  geom_histogram(binwidth = 0.01) + #
-  ggtitle("Mercury Data Exploration") + ##
-  ylab("Count") + ##
-  xlab("Result (ug/g dry weight)") ##
-
-fig1
-
-# Edit bin width to be more appropriate.
-## If we like this better, be sure to add a good title and axes labels.
-
-```
-
-
-```{r facet, echo = FALSE, fig.cap = "Figure 2. Nickel Facetted Barplot"}
+```{r facet, echo = TRUE, message = FALSE, fig.cap = "Figure 1. Metals Facetted Barplot"}
 
 # You can create multiple different figures at once using the facet feature.
 
-# Let's take a look at the nickel data from the samples, so again, let's create a new dataset.
+# Let's take a look at the copper, zinc, and lead data from the samples, so let's create a new dataset.
 
-Ni_data <- chemistry %>%
-  filter(analytename == "Nickel" & sampletype == "Result" & qualifier == "none")
+metals <- chemistry %>%
+  filter(analytename == "Copper" | analytename == "Zinc" | analytename == "Lead") %>%
+  filter(sampletype == "Result" & qualifier == "none")
 
-fig2 <- ggplot(data = Ni_data, aes(x = stationid, y = result)) +
+# Sampletype == "Result" means we filter out all of the standards and reference materials.
+# Qualifier == "none" means there were no issues during the QAQC process.
+# KNOW YOUR DATA! BRING YOUR BRAIN TO THE PARTY!
+
+# Say we're interested in looking at mean values by analytical laboratory.
+
+metals_summary <- metals %>% # Take the original dataset and then...
+  group_by(analytename, lab) %>% # group by the groupings we're interested in and then...
+  summarize(mean_conc = mean(result)) %>% # calculate the mean and standard deviation of results and then...
+  ungroup # remove the groupings. Don't forget it!
+
+# Create basic facetted bar plot.
+
+fig1 <- ggplot(data = metals_summary, aes(x = lab, y = mean_conc)) +
   geom_bar(stat="identity") + # just a weird thing you need in there if the data is values instead of counts
-  facet_wrap(~lab, scales = "free_x") + #     ##
-  ggtitle("Nickel Data by Lab") + ###
-  ylab("Result (ug/g dry weight)") + ###
-  xlab("Station ID") ###
+  facet_wrap(~analytename) # facet by analytical laboratory
 
-fig2
+# Add in axes, title, and remove grey background.
 
-# Go back and add "facet_wrap(~lab)".
-## Then go back and add "scales = "free_x".
-### Title and axis labels last.
+fig1a <- ggplot(data = metals_summary, aes(x = lab, y = mean_conc)) +
+  geom_bar(stat="identity") + # just a weird thing you need in there if the data is values instead of counts
+  facet_wrap(~analytename) + # facet by analytical laboratory
+  ggtitle("Metals Results by Lab") + # generates title above the plot
+  ylab("Mean Result (ug/g dry weight)") + # labels y axis
+  xlab("Analytical Laboratory") + # labels x axis
+  theme_bw() # removes the grey background
+
+# Remove x axis labels and instead color by laboratory.
+
+fig1b <- ggplot(data = metals_summary, aes(x = lab, y = mean_conc, fill = lab)) + # fill = lab adds the coloration
+  geom_bar(stat="identity") + # just a weird thing you need in there if the data is values instead of counts
+  facet_wrap(~analytename) + # facet by analytical laboratory     
+  ggtitle("Metals Results by Lab") + # generates title above the plot
+  ylab("Mean Result (ug/g dry weight)") + # labels y axis
+  xlab("Analytical Laboratory") + # labels x axis
+  theme_bw() + # removes the grey background
+  labs(fill = "Laboratories") + # changes legend title 
+  theme(axis.text.x=element_blank()) # eliminates x axis labels
+
+fig1b
 
 ```
 
 
-```{r scatterplot, echo = FALSE, fig.cap = "Figure 3. Total Organic Carbon Timeseries"}
+```{r timeseries, echo = TRUE, message = FALSE, fig.cap = "Figure 2. Total Organic Carbon Timeseries"}
 
 # Dates can be particularly nasty to deal with, so let's practice with them using the lubridate package.
 
@@ -166,69 +172,57 @@ fig2
 
 library(lubridate)
 
+# Filter out only the total organic carbon data and create a new column with the dates properly formatted.
 TOC_data <- chemistry %>%
   filter(analytename == "TOC" & sampletype == "Result" & qualifier == "none") %>%
   mutate(date_format = mdy_hm(sampledate))
 
-fig3 <- ggplot(data = TOC_data, aes(x = date_format, y = result)) +
-  geom_point(aes(color = lab)) +
-  scale_x_datetime(date_breaks = "months" , date_labels = "%b-%Y") + #
-  theme(legend.position="bottom") + ##
-  ggtitle("Total Organic Carbon Data through Time") + ###
-  ylab("Result (ug/g dry weight)") + ###
-  xlab("Date") ###
+# Create basic timeseries scatterplot.
 
-fig3
+fig2 <- ggplot(data = TOC_data, aes(x = date_format, y = result, color = lab)) +
+  geom_point()
 
-# Go back and add x axis date formatting.
-## Put legend along the bottom.
-### Title and axis labels last.
+# Add in axes, title, and remove grey background.
+
+fig2a <- ggplot(data = TOC_data, aes(x = date_format, y = result, color = lab)) +
+  geom_point() +
+  ggtitle("Total Organic Carbon Data through Time") + 
+  ylab("Result (ug/g dry weight)") + 
+  xlab("Date") +
+  labs(color = "Laboratories") +
+  theme_minimal()
+
+# Edit x axis labels and edit size/shading to view overlapping points better.
+
+fig2b <- ggplot(data = TOC_data, aes(x = date_format, y = result, color = lab)) +
+  geom_point(size = 3, alpha = 0.75) +
+  ggtitle("Total Organic Carbon Data through Time") +
+  ylab("Result (ug/g dry weight)") +
+  xlab("Date") +
+  labs(color = "Laboratories") +
+  theme_minimal() +
+  scale_x_datetime(date_breaks = "months" , date_labels = "%b-%Y")
+
+fig2b
 
 ```
 
 
-```{r palette, echo = FALSE, fig.cap = "Figure 4. Metals Boxplots using RColorBrewer"}
-
-# Another good data exploration tool is the boxplot.
-# We'll be using a special color package for this one.
+```{r geometries, echo = TRUE, fig.cap = "Figure 3. Color Palettes + Other Geometry"}
 
 # install.packages("RColorBrewer")
 
 library(RColorBrewer)
 
-Metals_data <- chemistry %>%
-  filter(analytename == "Aluminum" | analytename == "Iron" | analytename == "Copper" | analytename == "Lead") %>%
-  filter(sampletype == "Result" & qualifier == "none")
+# Insert another figure with an added geometry of some kind (geom_line, geom_smooth, etc.).
 
-fig4 <- ggplot(data = Metals_data, aes(x = analytename, y = result)) +
-  geom_boxplot(aes(color = analytename)) +
-  scale_colour_brewer("Analyte Name", palette="Set2") + #
-  theme_bw() + ##
-  ggtitle("Selected Metals Data") + ###
-  ylab("Result (ug/g dry weight)") + ###
-  xlab("Analyte Name") ###
-
-fig4
-
-# Add color palette.
-## Remove grey background.
-### Title and axis labels last.
-
-```
-
-
-```{r geometries, echo = FALSE, fig.cap = "Figure 5. Scatterplot + Other Geometry"}
-
-# Insert another geom_point with an added geometry of some kind (geom_line, geom_smooth, etc.).
-#ggsave
+# ggsave 
 
 ```
 
 As you can see, there are a million ways you can plot your data.
 
-Go ahead and make a new figure (choose from any of the formats above) and see if you can change the color of the plotting.
-
-Note: To save your machine from re-running everything and slowing, you can also add `cache = TRUE` inside the {} at the top of every code chunk. Knitr will then know only to re-run that chunk if something within it changes.
+*Note:* To save your machine from re-running everything and slowing, you can also add `cache = TRUE` inside the {} at the top of every code chunk. Knitr will then know only to re-run that chunk if something within it changes.
 
 The last fun thing we'll learn today is how to add a hovering table of contents. At the very top of your document, edit your header to look like the following:
 
