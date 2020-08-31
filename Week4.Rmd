@@ -1,0 +1,88 @@
+---
+title: "R/RStudio/RMarkdown Recap"
+author: "Heili Lowman"
+date: "9/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Demo Dataset
+
+In the following RMarkdown, I will be using the `lynx` dataset from `data()` in base R to practice importing, examining, tidying, editing, and visualizing a dataset.
+
+Remember - to insert a new code chunk either click on **Insert** > **R** at the top of the screen or use one of the shortcuts: 
+
+* Mac - **cmd + opt + I**
+* PC - **ctrl + alt + I**
+
+### Data & Packages
+
+```{r packages, message = FALSE}
+
+# Load necessary packages.
+library(tidyverse)
+
+# Add "message = FALSE" to the header to suppress messages from the knit document.
+
+```
+
+
+```{r data}
+
+# Load dataset.
+lynx_data <- lynx
+
+# If your data is external, save it to your R project, then import using read_csv().
+# dataset <- read_csv("my_data.csv")
+
+# Examine data. Then comment out, so it doesn't run in your script.
+# View(lynx_data)
+
+```
+
+
+### Data Tidying & Manipulation
+
+```{r tidy}
+
+# Examine dataset structure. Also commenting out so it doesn't run.
+# str(lynx_data)
+
+# My dataset is a time series, which can be a helpful format for some analyses, but I don't want it that way for this purpose.
+
+# So, this makes it a normal dataframe/tibble.
+# install.packages("timetk")
+library(timetk)
+lynx_df <- tk_tbl(lynx_data)
+
+# Rename columns.
+lynx_df <- lynx_df %>%
+  rename(Year = index, Lynx = value)
+
+```
+
+
+### Data Visualization
+
+```{r plot, message = FALSE}
+
+# Create a basic scatterplot of the data.
+lynx_fig <- ggplot(lynx_df, aes(x = Year, y = Lynx)) + # basic data and axes input
+  geom_point(size = 3, alpha = 0.75) + # calls for a scatterplot
+  geom_smooth(method = lm, color = "aquamarine2") + # adds a linear model with 95% confidence intervals
+  labs(x = "Year",
+    y = "Number of Lynx Trapped",
+    title = "Lynx R Dataset",
+    subtitle = "Tidy Tuesday Demo, September 1",
+    caption = "Data Source: Brockwell and Davis 1991") + # includes labels
+  theme_classic() + # uses a built in theme
+  scale_x_continuous(breaks = seq(1820,1940,10)) ## customizes x axes tick marks
+
+lynx_fig
+
+```
+
+*End of RMarkdown script.*
