@@ -135,12 +135,13 @@ boxplot2 <- trees_df %>%
 
 boxplot2
 
+# Most frequent category shown first, in descending order.
 # Can verify this ordering using the "count" dataset created above.
 
 # fct_reorder()
 
 boxplot3 <- trees_df %>%
-  mutate(SizeClassF = fct_reorder(SizeClassF, Volume)) %>% # Reorders by height data.
+  mutate(SizeClassF = fct_reorder(SizeClassF, Volume)) %>% # Reorders by volume data.
   ggplot(aes(x = SizeClassF, y = Height, color = SizeClassF)) +
   geom_boxplot() +
   labs(title = "Reordered by Volume Plot",
@@ -156,6 +157,53 @@ boxplot3
 # This is not the best example, because there isn't a one-to-one correspondence of size class (n = 5) to volume (n=31).
 
 # There is also a fct_reorder2() that allows you to reorder groups based on how their values plot on a graph using other variables for x and y.
+
+# fct_recode()
+
+boxplot4 <- trees_df %>% # Use base dataset and then...
+  mutate(SizeClassF = fct_relevel(SizeClassF, c("XS", "S", "M", "L", "XL"))) %>% # Relevel manually.
+  mutate(SizeClassF2 = fct_recode(SizeClassF, "X Small" = "XS", "Small" = "S", "Medium" = "M", "Large" = "L", "X Large" = "XL")) %>% # Rename levels in a new column.
+  ggplot(aes(x = SizeClassF2, y = Height, color = SizeClassF2)) + # Create a ggplot.
+  geom_boxplot() + # Using the boxplot geom.
+  labs(title = "Renamed Plot",
+    x = "Size Class",
+    y = "Height (ft)",
+    color = "Size Class",
+    caption = "Data Source: Ryan et al., 1976") + # Add appropriate labels.
+  theme_classic() + # Remove grey background.
+  theme(legend.position = "none") # Remove legend also.
+
+boxplot4
+
+# fct_other()
+
+boxplot5 <- trees_df %>% # Use base dataset and then...
+  mutate(SizeClassF3 = fct_other(SizeClassF, keep = c("S", "M", "L"))) %>% # Transforms "XS" and "XL" into an "other" category. Can also use drop = c() to drop certain categories.
+  ggplot(aes(x = SizeClassF3, y = Height, color = SizeClassF3)) + # Create a ggplot.
+  geom_boxplot() + # Using the boxplot geom.
+  labs(title = "Other Category Plot",
+    x = "Size Class",
+    y = "Height (ft)",
+    color = "Size Class",
+    caption = "Data Source: Ryan et al., 1976") + # Add appropriate labels.
+  theme_classic() + # Remove grey background.
+  theme(legend.position = "none") # Remove legend also.
+
+boxplot5
+
+# fct_expand()
+
+trees_expand <- trees_df %>% # Use base dataset and then...
+  mutate(SizeClassF4 = fct_expand(SizeClassF, "XXL")) # Creates new "XXL" category.
+  
+levels(trees_expand$SizeClassF4)
+
+# fct_drop()
+
+trees_expand <- trees_expand %>% # Use dataset from above...
+  mutate(SizeClassF5 = fct_drop(SizeClassF4)) # Drops unused "XXL" category.
+
+levels(trees_expand$SizeClassF5)
 
 ```
 
