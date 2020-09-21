@@ -1,0 +1,162 @@
+---
+title: "Week 7 Teaching Key"
+author: "Heili Lowman"
+date: "9/21/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## forcats tutorial
+
+This is an R Markdown document that will walk through a forcats tutorial prepared for SCCWRP's Tidy Tuesday series.
+
+### Packages
+
+```{r, echo = TRUE, message = FALSE}
+
+# Load necessary packages.
+library(tidyverse) # note: forcats is *within* the tidyverse.
+
+```
+
+### Data
+
+```{r, echo = TRUE, message = FALSE}
+
+# Load necessary data.
+
+#data() # Examine built-in R data.
+
+#View(trees) # Examine black cherry trees dataset.
+
+# Comment out the above so it doesn't print out in the RMarkdown.
+
+trees_df <- trees # Save the data to your environment.
+
+```
+
+### Tidy
+
+The *forcats* package is helpful for creating and re-leveling factors.
+
+```{r, echo = TRUE, message = FALSE}
+
+# Add a column of size classes by height.
+trees_df <- trees_df %>% # Use original dataset and then...
+  mutate(SizeClass = case_when(
+    Height < 65 ~ "XS",
+    Height >= 65 & Height < 70 ~ "S",
+    Height >= 70 & Height < 75 ~ "M",
+    Height >= 75 & Height < 80 ~ "L",
+    Height >= 80 ~ "XL")) # Create new column with size classes.
+
+# Examine dataset structure.
+str(trees_df)
+
+# Sizes are currently characters, so we need to make them factors.
+
+# factor()
+trees_df <- trees_df %>% # Use original dataset and then...
+  mutate(SizeClassF = factor(SizeClass)) # Make a new column of factors.
+
+str(trees_df)
+
+# You can also do the following to achieve the same result.
+
+trees_df$SizeClassF <- factor(trees_df$SizeClass)
+
+# level()
+levels(trees_df$SizeClassF) # Examine level order. Default is alphabetical order.
+
+# fct_relevel()
+fct_relevel(trees_df$SizeClassF, c("XS", "S", "M", "L", "XL")) # Relevel manually.
+
+# You can also do the following to achieve the same result.
+
+trees_df <- trees_df %>% # Use original dataset and then...
+  mutate(SizeClassF = factor(SizeClass, levels = c("XS", "S", "M", "L", "XL"))) # Make a new column of manually leveled factors.
+
+```
+
+### Exploration
+
+The *forcats* package is also helpful for examining factors in your dataset.
+
+```{r, echo = TRUE, message = FALSE}
+
+# fct_count()
+count <- fct_count(trees_df$SizeClassF) # Count number of observations in each level.
+#View(count)
+
+# fct_unique()
+unique <- fct_unique(trees_df$SizeClassF) # Count number of unique levels.
+#View(unique)
+
+# Create a base plot of the data.
+
+boxplot1 <- trees_df %>% # Use based dataset and then...
+  ggplot(aes(x = SizeClassF, y = Height, color = SizeClassF)) + # Create a ggplot.
+  geom_boxplot() + # Using the boxplot geom.
+  labs(title = "Base Plot",
+    x = "Size Class",
+    y = "Height (ft)",
+    color = "Size Class",
+    caption = "Data Source: Ryan et al., 1976") + # Add appropriate labels.
+  theme_classic() + # Remove grey background.
+  theme(legend.position = "none") # Remove legend also.
+
+boxplot1
+
+```
+
+### Analyses
+
+```{r, echo = TRUE, message = TRUE}
+
+# fct_infreq()
+
+boxplot2 <- trees_df %>%
+  mutate(SizeClassF = fct_infreq(SizeClassF)) %>% # Reorders by frequency of observations.
+  ggplot(aes(x = SizeClassF, y = Height, color = SizeClassF)) +
+  geom_boxplot() +
+  labs(title = "Frequency Plot",
+    x = "Size Class",
+    y = "Height (ft)",
+    color = "Size Class",
+    caption = "Data Source: Ryan et al., 1976") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+boxplot2
+
+# Can verify this ordering using the "count" dataset created above.
+
+# fct_reorder()
+
+boxplot3 <- trees_df %>%
+  mutate(SizeClassF = fct_reorder(SizeClassF, Volume)) %>% # Reorders by height data.
+  ggplot(aes(x = SizeClassF, y = Height, color = SizeClassF)) +
+  geom_boxplot() +
+  labs(title = "Reordered by Volume Plot",
+    x = "Size Class",
+    y = "Height (ft)",
+    color = "Size Class",
+    caption = "Data Source: Ryan et al., 1976") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+boxplot3
+
+# This is not the best example, because there isn't a one-to-one correspondence of size class (n = 5) to volume (n=31).
+
+# There is also a fct_reorder2() that allows you to reorder groups based on how their values plot on a graph using other variables for x and y.
+
+```
+
+End of RMarkdown document.
